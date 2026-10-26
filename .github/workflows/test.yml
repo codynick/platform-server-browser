@@ -1,4 +1,4 @@
-name: Multi-user checks
+name: Browser edition checks
 on: [push, pull_request]
 jobs:
   python314:
@@ -42,8 +42,7 @@ jobs:
           npm install --prefix /tmp/codynick-mobile-check playwright
           node /tmp/codynick-mobile-check/node_modules/playwright/cli.js install --with-deps chromium
           node tools/test_mobile.cjs
-          node tools/test_block_simulator.cjs
-          node tools/test_dashboard_preview.cjs
+          node tools/test_browser_runtime.cjs
           node tools/test_block_demos.cjs
           python tools/check_demo_behaviour.py
       - uses: actions/upload-artifact@v4

@@ -47,8 +47,8 @@ const ExecutionTarget = (() => {
     Blockly.serialization.registry.register('codynick_execution', {
       priority: 6,
       save: () => ({target: select().value}),
-      load: data => {select().value = data?.target === 'simulator' ? 'simulator' : 'hardware';},
-      clear: () => {select().value = 'hardware';}
+      load: data => {select().value = data?.target === 'hardware' ? 'hardware' : 'simulator';},
+      clear: () => {select().value = 'simulator';}
     });
     select().addEventListener('change', () => {updatePythonPreview(true);scheduleSave();});
   }

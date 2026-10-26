@@ -11,5 +11,5 @@ const types=[block('cn_rgb_matrix_set'),block('cn_joystick_states',"'STANDALONE'
 const code=context.target.initialization(types);
 assert.deepEqual(JSON.parse(code.split('required_gadgets=')[1].slice(0,-1)),['cjp','joystick','matrix','seven','soil','temperature','ultrasonic','wifi']);
 for(const b of [block('cn_rfid_readuid'),block('cn_motion_detect'),block('cn_seven_segment_display',"'ULTRASEG'"),block('cn_joystick_click','1'),block('cn_update_lib')])assert(context.target.initialization([b]).startsWith('raise RuntimeError('));
-assert.equal(serializer.save().target,'simulator');serializer.clear();assert.equal(select.value,'hardware');serializer.load({target:'simulator'});assert.equal(select.value,'simulator');serializer.load({});assert.equal(select.value,'hardware');
+assert.equal(serializer.save().target,'simulator');serializer.clear();assert.equal(select.value,'simulator');serializer.load({target:'simulator'});assert.equal(select.value,'simulator');serializer.load({});assert.equal(select.value,'simulator');
 console.log('Execution mode, all supported requirements, unsupported devices and legacy serialization passed');

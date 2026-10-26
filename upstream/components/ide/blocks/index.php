@@ -148,6 +148,9 @@ function load_block_packages(string $blocksDir): array {
 [$BLOCK_PACKAGES, $BLOCK_WARNINGS] = load_block_packages($BLOCKS_DIR);
 
 $api = $_GET['api'] ?? null;
+if ($api === 'run' || $api === 'stop') {
+    json_response(['ok'=>false, 'error'=>'Use local browser Run/Stop. Server execution is disabled for Blockly in this edition.'], 409);
+}
 
 if ($api === 'load') {
     if (is_file($MAIN_JSON_FILE)) {
@@ -1402,7 +1405,9 @@ function generatePython() {
 }
 
 function updatePythonPreview(markFresh = true) {
-  const code = generatePython();
+  let code;
+  try { code = window.BrowserRunner ? BrowserRunner.preview(workspace) : generatePython(); }
+  catch(error) { code = '// ' + error.message; }
   document.getElementById('pythonPreview').textContent = code;
   return code;
 }
@@ -1444,6 +1449,8 @@ async function saveWorkspaceNow(silent = false) {
 }
 
 async function runProgram() {
+  if (!window.BrowserRunner) return toast('Browser runtime unavailable. Refresh this page.', true);
+  return BrowserRunner.run(workspace);
   setControlBusy(true);
   try {
     const python = updatePythonPreview(true);
@@ -1467,6 +1474,8 @@ function setControlBusy(busy) {
 }
 
 async function stopProgram() {
+  if (!window.BrowserRunner) return toast('Browser runtime unavailable. Refresh this page.', true);
+  return BrowserRunner.stop();
   setControlBusy(true);
   try {
     const data = await postJson('?api=stop', {});

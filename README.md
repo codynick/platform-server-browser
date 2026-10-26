@@ -1,228 +1,99 @@
-# CodyNick Multi-user 0.1.9
+# CodyNick Platform Server Browser 0.1.0-browser
 
 ## Install or Update: One Fixed Command
 
-Run this same command on your Ubuntu server for a first installation, repair or update:
+**Prototype: use a separate Ubuntu test VM/server. Do not install over platform-server.**
+The installer refuses conversion of an existing server-edition installation.
 
 ```bash
-wget -4 -O /tmp/codynick-multi-setup.sh "https://raw.githubusercontent.com/codynick/platform-server/main/setup.sh?$(date +%s)" && sudo bash /tmp/codynick-multi-setup.sh
+wget -4 -O /tmp/codynick-browser-setup.sh "https://raw.githubusercontent.com/codynick/platform-server-browser/main/setup.sh?$(date +%s)" && sudo bash /tmp/codynick-browser-setup.sh
 ```
 
-Wait for **`CodyNick Multi-user 0.1.9: READY`** before using the updated system.
-
-## Installation Details
-
-First installation asks for a web username and password. These are independent
-of Linux/SSH accounts. Installation then runs in the background across SSH
-disconnects. Wait for `CodyNick Multi-user 0.1.9: READY`.
+Wait for **CodyNick Browser 0.1.0-browser: READY**. Progress survives SSH disconnects:
 
 ```bash
 sudo tail -n 80 -F /var/log/codynick-multi/install.log
 sudo codynick-multi-user status
-sudo codynick-multi-user list
 ```
 
-All users open `http://VM-IP/` and enter their own username and password in the
-shared login page. For VirtualBox NAT on Windows, forward TCP **2222 to guest 22**
-for SSH and **8080 to guest 80** for all web users. Open `http://127.0.0.1:8080/`.
-No additional user-port forwarding rules are needed. The installer does not alter
-firewall rules. Use a dedicated VM; its default Apache site becomes this portal.
+## First Test
 
-## Accounts
+1. Sign in at your test server address. Open Block Coding.
+2. Open Simulator and Dashboard in separate tabs on the same origin and browser profile.
+3. In Simulator, add temperature and seven-segment gadgets.
+4. In Block Coding, Load **Demo 1 - Temperature Monitor** and press Run.
+5. Move the temperature slider. Display, gauge and graph update locally.
+6. After all pages have loaded, disconnect the network: live updates continue.
+7. Stop retains the last dashboard values. Reconnect before saving designs.
 
-Sign in with the first account (normally `teacher`), choose **Users** on the main
-panel, and enter a username, password and password confirmation under **Add Student**.
-The account appears in the list and can sign in at the same address immediately
-after successful creation. The existing teacher session stays signed in.
+The other pre-installed demos are Temperature Traffic Light (CJP, temperature,
+seven-segment), Parking Assistant (CJP, ultrasonic), and Joystick Status (CJP).
+CJP is always present on the simulation stage.
 
-On upgrade from 0.1.0/0.1.1, the first-created account becomes Administrator;
-existing other accounts become Students. All passwords and files are retained.
-Only administrators can open Users or create students through the web interface.
-To reset a password, choose **Reset** in that user's row of the Users table.
-Any user can choose **Change Password** on the main panel to update their own
-password after entering the current password. Changed accounts must sign in again;
-password changes do not restart their Python script. Use HTTPS, an SSH tunnel or
-a trusted private connection for passwords. There is no web account deletion or role editing yet.
-The original SSH commands still work:
+## What Changed
 
-```bash
-sudo codynick-multi-user add-user student1
-sudo codynick-multi-user add-user student2
-sudo codynick-multi-user passwd student1
-sudo codynick-multi-user list
-```
+The existing Simulator and Dashboard markup, styles and rendering are preserved.
+Blockly generates JavaScript executed in a dedicated worker. A small local adapter
+supplies the tools' live data; BroadcastChannel and browser storage coordinate
+the separate tabs. Sensor, LED, display and dashboard updates do not contact the server.
+Run/Stop is local; the Blockly server-execution endpoint is disabled.
 
-Everyone uses the same address. A session cookie selects the signed-in account;
-use separate browser profiles/devices to test multiple users simultaneously.
-Sign Out is on the main panel. Sessions expire after 12 hours idle and are cleared
-when the login service restarts; running scripts continue until Stop or an upgrade.
-Adding an account does not sign out others. Password changes invalidate that account's
-sessions. There is no self-registration. Do not publish this HTTP service to the Internet.
+Login, account administration and design Save/Load remain server features.
+The Python IDE is retained and still executes Python on the server; it is outside
+this browser-runtime milestone. Its database dashboard is not mixed into the
+local browser dashboard.
 
-## Minimum-change architecture
+## Supported in This Prototype
 
-The tested single-user interfaces are reused rather than rewritten. Each account
-gets its own document root, Run/Stop socket, Python process, dashboard database,
-simulator and sprite state. A small Python session router sits behind Apache's
-single public port 80 and routes to private loopback-only account sites. Apache
-proxies each simulator behind that account's same-origin paths. Libraries and
-interfaces come from one vendored source tree and are materialized per account.
-This uses more disk/processes than a fully namespaced backend but changes much
-less upstream code. There is no AI memory overhead.
+The four demos; variables, text, comparisons, arithmetic, conditions, repeat/while/
+forever, waits and timer; simulated temperature, distance, soil and CJP joystick;
+individual RGB LEDs, clear LEDs and live seven-segment; dashboard info/gauge/graph
+creation, values, history, range, colour, size, font and alignment settings.
+Unsupported blocks fail clearly rather than falling back to server execution.
+Missing gadgets prompt users to add them and re-run.
 
-- Personal files: `/var/lib/codynick-multi/users/NAME/userfiles/`
-- Named designs: `.../web/blocks/data/designs/`
-- Active script and log: `.../active_script.py`, `.../log.log`
-- Account configuration: `/etc/codynick-multi/accounts.json` (root-only)
-- Managed release: `/opt/codynick-multi/current`
-- Account service: `codynick-multi-NAME.service`
-- Shared login service: `codynick-multi-gateway.service` (loopback 9000)
-- Fixed-action root account broker: `codynick-multi-admin.socket` / `.service`
-- Private account sites: loopback 8100-8199, not public user addresses
-- Private backend ports: 9200-9399 on loopback only
+AI and physical USB/Web Serial are postponed. Sprite execution, LED-matrix,
+buzzer and Wi-Fi/IoT blocks are outside this first milestone. Their existing
+pages/toolbox entries remain for inspection, but unsupported code will not run.
+No Simulator or Dashboard visual redesign is included.
 
-The updater preserves user files, active scripts, designs and simulation layouts.
-The `CodyNick examples` folder is managed and replaced; students must work outside it.
-Running scripts are stopped during an update. They do not auto-resume on reboot;
-the user presses Run. The original single-user scripts/services are not stopped or
-reconfigured; for the first test use a clean VM to avoid port/hardware conflicts.
+## Local Data and Lifecycle
 
-## Networking and physical hardware
+Live state is per origin, browser profile and account name. Two computers using
+the same login do not share live readings/cards. Saved designs remain server-side.
+Closing the running Blockly page stops its program. Only one Blockly program per
+account/browser profile runs at a time. Closing an inactive tool page does not
+stop the running program. Background throttling and power saving can affect timing.
 
-Networking is deliberately unchanged on both architectures in this first edition.
-Use an existing LAN connection/hotspot. There is no new hotspot provisioning,
-Raspberry Pi firmware operation or device cloning logic in this installer.
-Physical CJP use in a VM requires USB passthrough. The only serial-driver change
-is pyserial `exclusive=True` on Linux; serial detection/timing is unchanged.
-Keyboard emulation requiring root is not supported by the unprivileged runner;
-browser sprite keys and simulator joysticks work without root.
+This is not a complete offline installation: assets and login must load first,
+and saving needs connectivity. Clearing browser site data removes local scenes
+and cards. Existing server-side dashboard database records are not used by local
+browser programs.
 
-## Test with two users
+## Accounts and Deployment
 
-1. Create student1 and student2. Open the same address in separate browser profiles/devices; sign in separately.
-2. Run different printing loops. Stop one; the other must continue.
-3. Save files/designs with the same names; load them and verify different contents.
-4. Run simulator examples and different sprite programs. Scenes must remain independent.
-5. Create a dashboard counter in each account; clearing one must not clear the other.
-6. Re-run the same installation command; verify saved files and named designs survive.
+The first web account is administrator. Use Manage students for additional accounts.
+These are web accounts, not Linux/SSH accounts. For minimum change, the base
+service names, paths and admin command remain codynick-multi-*.
+Use a dedicated test host/domain: the two editions cannot be installed side-by-side
+on one OS with the default configuration.
 
-This is an initial release requiring VM acceptance testing. No hostile-code sandbox:
-student programs intentionally share an unprivileged OS account. CPU/RAM quotas,
-HTTPS, per-user Linux identities and multi-tenant AI are outside this version.
+This remains a trusted-user prototype, not a sandbox for hostile Python.
+Use HTTPS on a remotely exposed server. No hotspot/network configuration changes.
+The original platform-server repository and installed systems are untouched.
 
-## Development and publication
+## Development
 
-`python -m unittest discover -s tests` checks generation, preserved data and process
-separation. Linux CI also lints PHP and tests real independent process groups.
-`python tools/seal.py` regenerates the release file hashes. Publish immutable tag
-`v0.1.5-block-simulator` with main. Never move a published tag; make a new release.
-Keep the fixed command unchanged on later versions. Older source directories are
-retained; automated downgrade selection is not implemented in this initial edition.
+Based on platform-server 0.1.9 with Git history preserved. Original release tags
+remain unchanged. tools/seal.py records browser-edition release checksums.
+Browser tests open the existing tools in separate pages, switch the network
+offline, run all four demos, and check that live data APIs never reach the server.
+CI also installs on Ubuntu, tests account/design preservation and repeats upgrade.
 
 ## Revision History
 
-### New in 0.1.9: Pre-installed Demo Designs
+### 0.1.0-browser
 
-Four simple Simulator + Dashboard designs in `CodyNick examples/blockly`:
-temperature monitor (including live seven-segment), temperature traffic light,
-parking assistant and joystick status. See `SIMULATION_DEMOS.md` for required
-gadgets and thresholds. Includes a separate live-value seven-segment block
-and variable-map API compatibility fix. Demos are pre-installed in every user's
-Load list without replacing saved designs or edited demos. Open Block Coding,
-click Load, and choose Demo 1, 2, 3 or 4. No file upload or separate local patch
-is needed. Both existing accounts and newly added accounts receive the demos.
-
-### New in 0.1.8: Blockly Dashboard
-
-The tested Blockly Dashboard is now included in the full installer. It adds a Dashboard top-level tab with
-Setup, Info, Gauge and Graph folders, larger centered info/gauge defaults,
-and Open Dashboard. Blocks create info/gauge/graph widgets, update values, append
-samples, limit history, set gauge range, and set appearance/font properties.
-Dashboard-only designs do not open hardware or require simulator gadgets. Widgets
-are per-account and retain their values after Stop. Existing generic widget blocks
-remain compatible. Upload `CodyNick examples/blockly/dashboard_counter.codynick`
-in Block Coding, click Open Dashboard, then Run for a timer and graph demo.
-This upgrade includes all previously tested local Dashboard changes; the separate
-local patch is no longer needed. Accounts, saved designs and student files persist.
-
-### New in 0.1.7
-
-Public welcome page retains the workshop photos. Start Creating opens Block
-Coding after login; other protected links also preserve their local destination.
-Bootstrap login uses a faded photo backdrop. The signed-in panel is a practical
-tool workspace with a faint photo watermark and the existing ribbon. The top-right
-account menu offers Change password and Sign out on desktop and mobile.
-The installer log viewer no longer inherits the setup lock, so an old tail
-process cannot block subsequent installations. Accounts and student work persist.
-
-### New in 0.1.6
-
-Main Panel-only Bootstrap facelift based on the supplied design, with offline
-embedded images and styles, live account/role/version, real tool links and POST
-sign-out. Student accounts do not see user management. Login, password pages,
-editors, simulation and dashboard behavior are unchanged.
-
-Separate classroom edition based on CodyNick 0.11.0 (upstream commit 50539ea).
-Ubuntu Server x86-64 VM and ARM64; Python IDE, Blockly, sprites, gadget simulation,
-dashboard. No AI packages/models. No changes to the separate RPi edition.
-
-### Changes in 0.1.5: Blockly to gadget simulator
-
-In Block Coding, select **Simulator** under **Run on**, next to the design name.
-Choose **Open Simulator**, add the required gadgets to the simulation space, then
-press **Run** in Blockly. Sprite blocks can run alongside the simulated gadgets.
-The existing per-account process and simulator keep users independent; no USB
-serial connection is opened in Simulator mode and there is no hardware fallback.
-
-Mode is saved with autosave, named designs and downloaded `.codynick` files.
-Older designs without a mode remain on **Hardware** for compatibility. Changing
-the selector updates the next generated program, not a currently running script.
-
-Before a simulated program starts, required gadgets are checked. If a gadget is
-missing, Blockly and the simulator report: **Add [gadget] to the simulation space,
-then re-run the app.** No session is locked by that preflight error, so users can
-add the gadget and rerun without an extra Stop. Exported Python also checks at startup.
-Stop now sends a graceful interrupt
-before the existing forced-stop fallback, releasing simulation sessions for quick reruns.
-
-Supported: CJP LEDs/joystick/buzzer, standalone joystick, LED matrix, standalone
-seven-segment and ultrasonic devices, temperature, soil moisture, and Wi-Fi/IoT.
-Motion/RFID/keypad, legacy sensor aliases, library updates and unsupported device
-IDs are rejected clearly in Simulator mode rather than accessing physical hardware.
-
-### Changes in 0.1.4
-
-Python IDE compact layout only at viewport widths of 760px and below. Files move
-into a toggled drawer that closes after file selection; Run and Stop stay in the
-visible toolbar. The compact Run label reads "Run"; desktop retains "Run this File".
-Editor/terminal sizing adapts to portrait, landscape and browser viewport changes.
-Desktop geometry above the breakpoint, script controls, account isolation and
-other tools are unchanged. Browser tests compare desktop bounds with the old layout
-and exercise real Run/Stop plus Files at phone and landscape sizes.
-
-### Changes in 0.1.3
-
-Web administrator password resets and current-password-verified self-service changes,
-with confirmation, CSRF protection and affected-session invalidation. Authentication
-refresh no longer restarts a user's program, including terminal password changes.
-The installer creates its log file before launching the background worker and uses
-retrying log follow, avoiding the first-install "No such file" display race.
-
-### Changes in 0.1.2
-
-Administrator-only Users page with Add Student and an account list; no general
-root shell/sudo access is given to the web service. A fixed-action Unix socket
-broker validates administrator role, username and password and provisions students
-using the existing account setup. CSRF tokens protect account-creation forms.
-This is browser-role separation, not a hostile-Python sandbox: the earlier shared
-Linux-identity limitation remains. The main panel now uses the original RPi panel's
-CodyNick logo, blue/white styling and tool-card layout, with correct account, role
-and release information. New-listener health checks wait for Apache reload readiness
-instead of reporting a transient Connection Refused traceback.
-
-### Changes in 0.1.1
-
-Shared form-based sign-in/sign-out and one public address replace per-user public
-ports and browser Basic authentication. Existing 0.1.0 account passwords, files,
-designs and dashboard databases are retained. Old private services remain the same;
-only web listeners, login/routing, installer metadata, tests and guides changed.
+First browser-runtime prototype: worker execution, local cross-tab simulator and
+dashboard transport, four pre-installed demos, unsupported-block errors and an
+installation guard protecting an existing server edition.

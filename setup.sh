@@ -1,6 +1,6 @@
 #!/bin/bash
 set -Eeuo pipefail
-TAG=v0.1.9-preinstalled-demos
+TAG=v0.1.0-browser
 ROOT=/opt/codynick-multi
 if [[ $EUID != 0 ]]; then echo 'Run this installer with sudo bash.'; exit 1; fi
 mkdir -p "$ROOT" /var/log/codynick-multi
@@ -13,7 +13,7 @@ fi
 tmp=$(mktemp -d)
 trap 'rm -rf -- "$tmp"' EXIT
 wget -4 --timeout=30 --tries=5 -O "$tmp/release.tar.gz" \
-  "https://codeload.github.com/codynick/platform-server/tar.gz/refs/tags/$TAG"
+  "https://codeload.github.com/codynick/platform-server-browser/tar.gz/refs/tags/$TAG"
 mkdir "$tmp/source"
 tar -xzf "$tmp/release.tar.gz" -C "$tmp/source" --strip-components=1
 python3 "$tmp/source/install.py" verify "$tmp/source"

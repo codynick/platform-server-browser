@@ -18,7 +18,7 @@ import time
 import urllib.request
 import urllib.error
 
-VERSION = '0.1.9'
+VERSION = '0.1.0-browser'
 SOURCE = Path(__file__).resolve().parent
 CONFIG = Path('/etc/codynick-multi')
 DATA = Path('/var/lib/codynick-multi')
@@ -98,7 +98,14 @@ def accounts_lock():
         yield
 
 
+def check_edition():
+    existing = DATA / 'state.json'
+    if existing.exists() and json.loads(existing.read_text()).get('edition') != 'browser':
+        raise RuntimeError('A server-execution edition is installed. Use a separate test VM/server for the browser edition; no conversion is performed.')
+
+
 def prepare():
+    check_edition()
     if platform.machine() not in ('x86_64', 'aarch64'):
         raise RuntimeError('Ubuntu x86-64 or ARM64 is required.')
     os_release = dict(line.split('=', 1) for line in Path('/etc/os-release').read_text().splitlines() if '=' in line)
@@ -220,6 +227,20 @@ def provision(name, account, source=SOURCE, data=DATA):
     write(web / 'index.html', page(name, account.get('role', 'student')))
     write(web / 'assets/multi.css', (source / 'multi.css').read_text())
     write(web / 'assets/portal.css', (source / 'portal.css').read_text())
+    for filename in ('state', 'adapter', 'generator', 'runtime', 'worker'):
+        shutil.copy2(source / 'browser' / (filename + '.js'), web / 'assets' / ('browser-' + filename + '.js'))
+    common = '<script>window.CODY_BROWSER_ACCOUNT=' + json.dumps(name) + ';</script><script src="/assets/browser-state.js"></script><script src="/assets/browser-adapter.js"></script>'
+    for target in (web / 'blocks/index.php', web / 'dashboard/index.php', home / 'simulator/index.html'):
+        scripts = common
+        text = target.read_text(encoding='utf-8')
+        if target == web / 'blocks/index.php':
+            scripts += '<script src="/assets/browser-generator.js"></script><script src="/assets/browser-runtime.js"></script>'
+            text = text.replace('View Python', 'View JavaScript').replace('Generated Python', 'Generated JavaScript').replace('Python generator', 'Browser execution').replace('generated Python', 'generated JavaScript').replace('Generate Python and start script', 'Run locally in this browser').replace('Python copied.', 'JavaScript copied.')
+            text = text.replace('<option value="hardware">Hardware</option>', '<option value="hardware" disabled>USB (later)</option>')
+            text = text.replace('<option value="simulator">Simulator</option>', '<option value="simulator" selected>Simulator (browser)</option>')
+        if target == web / 'dashboard/index.php':
+            text = text.replace('</body>', '<script>BrowserState.subscribe(message=>{if(message.key==="cards")pollState();});</script></body>')
+        write(target, text.replace('</head>', scripts + '</head>'))
     write(web / 'guide.html', (source / 'guide.html').read_text())
     # HTTP Basic auth's per-account password file is outside the document root.
     write(home / 'passwords', name + ':' + account['hash'] + '\n', 0o640)
@@ -343,7 +364,7 @@ def gateway_health():
 
 
 def state(stage, error=None):
-    write(DATA / 'state.json', json.dumps({'version': VERSION, 'stage': stage,
+    write(DATA / 'state.json', json.dumps({'edition': 'browser', 'version': VERSION, 'stage': stage,
           'updated_at': datetime.now(timezone.utc).isoformat(), 'error': error}, indent=2))
 
 
@@ -373,6 +394,7 @@ UMask=0077
 
 
 def install():
+    check_edition()
     state('installing')
     print(f'CodyNick Multi-user {VERSION}: INSTALLING', flush=True)
     try:
@@ -410,7 +432,7 @@ def install():
             health(name, port)
         gateway_health()
         state('ready')
-        print(f'CodyNick Multi-user {VERSION}: READY', flush=True)
+        print(f'CodyNick Browser {VERSION}: READY', flush=True)
         print('All users: http://<device-IP>/ (VirtualBox: http://127.0.0.1:8080/)', flush=True)
         print('Networking was not changed. AI was not installed.', flush=True)
     except Exception as error:

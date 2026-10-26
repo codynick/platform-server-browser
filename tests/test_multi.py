@@ -82,6 +82,10 @@ class WorkspaceTests(unittest.TestCase):
             bob, bp, bsp = install.provision('bob', self.account(1), ROOT, data)
             self.assertEqual((ap, bp, asp, bsp), (8100, 8101, 9200, 9202))
             for home, name, port in ((alice, 'alice', 9201), (bob, 'bob', 9203)):
+                self.assertTrue((home / 'web/assets/browser-worker.js').exists())
+                self.assertIn('CODY_BROWSER_ACCOUNT=' + json.dumps(name), (home / 'web/blocks/index.php').read_text())
+                self.assertIn('browser-adapter.js', (home / 'web/dashboard/index.php').read_text())
+                self.assertIn('browser-state.js', (home / 'simulator/index.html').read_text())
                 config = (home / 'web/code/config.php').read_text()
                 self.assertIn((home / 'active_script.py').as_posix(), config)
                 self.assertNotIn('/home/client', config)
