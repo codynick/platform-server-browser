@@ -17,7 +17,7 @@ def run(*args):
 
 if SITE.exists():
     raise SystemExit('Refusing to replace an existing test virtual host.')
-with tempfile.TemporaryDirectory() as temp:
+with tempfile.TemporaryDirectory(dir='/var/lib') as temp:
     root = Path(temp)
     root.chmod(0o755)
     certificates = root / 'certificates'
