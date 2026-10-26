@@ -130,6 +130,10 @@ def handler(sessions):
             except Exception:
                 return ''
 
+        def cookie_flags(self):
+            # Only Apache's TLS virtual host sets this header; HTTP removes it.
+            return '; Secure' if self.headers.get('X-Forwarded-Proto') == 'https' else ''
+
         def body(self, limit):
             if self.headers.get('Transfer-Encoding'):
                 raise ValueError('Chunked requests are not supported')
@@ -168,12 +172,12 @@ def handler(sessions):
                     token = sessions.login(form.get('username', [''])[0].strip(), form.get('password', [''])[0])
                     if token is None:
                         return self.send(401, login_page('Incorrect username or password.', next_path=destination))
-                    return self.send(303, headers=[('Location', destination), ('Set-Cookie', f'{COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict')])
+                    return self.send(303, headers=[('Location', destination), ('Set-Cookie', f'{COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict' + self.cookie_flags())])
                 if path == '/logout':
                     if self.command != 'POST':
                         return self.send(405, 'POST required')
                     sessions.logout(self.token())
-                    return self.send(303, headers=[('Location', '/login'), ('Set-Cookie', f'{COOKIE}=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict')])
+                    return self.send(303, headers=[('Location', '/login'), ('Set-Cookie', f'{COOKIE}=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict' + self.cookie_flags())])
                 account = sessions.account(self.token())
                 if account is None:
                     if path == '/' and self.command in ('GET', 'HEAD'):
@@ -202,7 +206,7 @@ def handler(sessions):
                             return self.send(400, password_page(name, target, csrf, reset, result.get('error', 'Password change failed.')))
                         if target == name:
                             sessions.logout(self.token())
-                            return self.send(303, headers=[('Location', '/login?changed=1'), ('Set-Cookie', f'{COOKIE}=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict')])
+                            return self.send(303, headers=[('Location', '/login?changed=1'), ('Set-Cookie', f'{COOKIE}=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict' + self.cookie_flags())])
                         return self.send(303, headers=[('Location', '/admin/users?updated=' + target)])
                     return self.send(200, password_page(name, target, csrf, reset))
                 if path == '/admin/users':

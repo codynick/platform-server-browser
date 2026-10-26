@@ -30,6 +30,7 @@ jobs:
           sudo python3 /opt/codynick-multi/releases/test/tools/ci_accounts.py
           sudo python3 -u /opt/codynick-multi/releases/test/install.py install
       - run: sudo python3 tests/vm_acceptance.py
+      - run: sudo python3 tools/test_tls_gateway.py
       - name: Verify same-version upgrade preserves designs
         run: |
           sudo python3 -u /opt/codynick-multi/releases/test/install.py install

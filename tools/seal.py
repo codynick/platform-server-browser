@@ -11,5 +11,5 @@ for path in sorted(root.rglob('*')):
     if path.name == 'release.json' or path.suffix == '.pyc':
         continue
     files[relative.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
-(root / 'release.json').write_bytes((json.dumps({'version': '0.1.0-browser', 'files': files}, indent=2) + '\n').encode())
+(root / 'release.json').write_bytes((json.dumps({'version': '0.1.1-browser', 'files': files}, indent=2) + '\n').encode())
 print('Sealed', len(files), 'files')

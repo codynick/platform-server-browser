@@ -1,4 +1,4 @@
-# CodyNick Platform Server Browser 0.1.0-browser
+# CodyNick Platform Server Browser 0.1.1-browser
 
 ## Install or Update: One Fixed Command
 
@@ -9,12 +9,40 @@ The installer refuses conversion of an existing server-edition installation.
 wget -4 -O /tmp/codynick-browser-setup.sh "https://raw.githubusercontent.com/codynick/platform-server-browser/main/setup.sh?$(date +%s)" && sudo bash /tmp/codynick-browser-setup.sh
 ```
 
-Wait for **CodyNick Browser 0.1.0-browser: READY**. Progress survives SSH disconnects:
+Wait for **CodyNick Browser 0.1.1-browser: READY**. Progress survives SSH disconnects:
 
 ```bash
 sudo tail -n 80 -F /var/log/codynick-multi/install.log
 sudo codynick-multi-user status
 ```
+
+## Optional HTTPS for a Public Server
+
+The same setup command asks for an HTTPS domain and contact email. Accept the
+Let's Encrypt agreement explicitly when prompted. For local VM testing, press
+Enter at the domain prompt to keep HTTP. Existing HTTPS settings are reused on
+upgrades, so the background installer never needs interactive input.
+
+Before enabling HTTPS, point the domain's A record at this server. If an AAAA
+record exists, its IPv6 address must also reach this server. Permit inbound TCP
+80 and 443 in the provider firewall and any host firewall. The installer does
+not change firewall rules, DNS or SSH settings. Correct system time is required.
+
+Certbot uses HTTP-01 webroot validation, then Apache redirects HTTP to HTTPS
+except the certificate-validation path. The TLS proxy sets Secure session cookies.
+Certificate renewal uses certbot.timer and reloads Apache after successful renewal;
+this does not enable automatic OS updates. Re-running setup does not force a new
+certificate. Configuration is stored root-only in /etc/codynick-multi/https.json.
+
+If certificate issuance fails, the installer reports failure (not READY). Correct
+DNS/ports/time and rerun the SAME setup command; accounts and designs are retained.
+The certificate details are in /var/log/letsencrypt/letsencrypt.log. After setup,
+check renewal with sudo certbot renew --dry-run and timer state with
+sudo systemctl status certbot.timer --no-pager. Keep port 80 open for renewal.
+
+Changing HTTP to HTTPS creates a different browser origin: saved server designs
+remain, but re-add local simulator gadgets on the HTTPS page. Use HTTPS in every
+tool tab so their local state is shared.
 
 ## First Test
 
@@ -91,6 +119,12 @@ offline, run all four demos, and check that live data APIs never reach the serve
 CI also installs on Ubuntu, tests account/design preservation and repeats upgrade.
 
 ## Revision History
+
+### 0.1.1-browser
+
+Optional guided Certbot HTTPS setup, persistent Apache TLS/redirect configuration,
+automatic certificate renewal, Secure cookies and certificate-failure diagnostics.
+No change to the browser simulation/dashboard designs.
 
 ### 0.1.0-browser
 

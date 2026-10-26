@@ -17,8 +17,9 @@ import sys
 import time
 import urllib.request
 import urllib.error
+import https_setup
 
-VERSION = '0.1.0-browser'
+VERSION = '0.1.1-browser'
 SOURCE = Path(__file__).resolve().parent
 CONFIG = Path('/etc/codynick-multi')
 DATA = Path('/var/lib/codynick-multi')
@@ -119,6 +120,8 @@ def prepare():
         name = validate_name(input('Username [teacher]: ').strip() or 'teacher')
         saved[name] = new_account(name, saved)
     save_accounts(saved)
+
+    https_setup.prepare()
 
 
 def copy_tree(src, dst):
@@ -332,15 +335,7 @@ WantedBy=multi-user.target
 '''
     write('/etc/systemd/system/codynick-multi-gateway.service', unit)
     # Apache already listens on port 80. This is the dedicated VM's default site.
-    conf = '''<VirtualHost *:80>
-ServerName codynick.local
-ProxyPreserveHost On
-ProxyTimeout 90
-ProxyPass / http://127.0.0.1:9000/
-ProxyPassReverse / http://127.0.0.1:9000/
-ErrorLog ${APACHE_LOG_DIR}/codynick-multi-gateway.log
-</VirtualHost>
-'''
+    conf = https_setup.gateway_conf()
     write('/etc/apache2/sites-available/000-codynick-multi-gateway.conf', conf)
     run('a2dissite', '000-default')
     run('a2ensite', '000-codynick-multi-gateway')
@@ -353,7 +348,7 @@ ErrorLog ${APACHE_LOG_DIR}/codynick-multi-gateway.log
 def gateway_health():
     for attempt in range(30):
         try:
-            with urllib.request.urlopen('http://127.0.0.1/login', timeout=3) as response:
+            with urllib.request.urlopen('http://127.0.0.1:9000/login', timeout=3) as response:
                 if b'Username' not in response.read():
                     raise RuntimeError('Shared login page not available')
             return
@@ -405,6 +400,10 @@ def install():
             'apache2', 'libapache2-mod-php', 'php-mysql', 'php-mbstring', 'mariadb-server',
             'python3-venv', 'python3-pip', 'curl', 'openssl', env=env)
         run('id', '-u', 'www-data', stdout=subprocess.DEVNULL)
+        if https_setup.settings():
+            run('apt-get', '-o', 'DPkg::Lock::Timeout=600', '-o', 'Acquire::Retries=5', 'install', '-y', 'certbot', env=env)
+            (https_setup.WEBROOT / '.well-known/acme-challenge').mkdir(parents=True, exist_ok=True)
+            run('a2enmod', 'ssl', 'rewrite')
         if subprocess.run(['id', '-u', 'codymulti'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
             run('useradd', '--system', '--home-dir', str(DATA), '--shell', '/usr/sbin/nologin', 'codymulti')
         run('usermod', '-aG', 'dialout,www-data', 'codymulti')
@@ -431,9 +430,10 @@ def install():
         for name, port in ports.items():
             health(name, port)
         gateway_health()
+        https_url = https_setup.enable(run, write, configure_gateway)
         state('ready')
         print(f'CodyNick Browser {VERSION}: READY', flush=True)
-        print('All users: http://<device-IP>/ (VirtualBox: http://127.0.0.1:8080/)', flush=True)
+        print('All users: ' + (https_url or 'http://<device-IP>/ (VirtualBox: http://127.0.0.1:8080/)'), flush=True)
         print('Networking was not changed. AI was not installed.', flush=True)
     except Exception as error:
         state('failed', str(error))
