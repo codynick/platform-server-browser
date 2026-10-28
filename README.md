@@ -1,4 +1,4 @@
-# CodyNick Portal 3.11.1
+# CodyNick Portal 3.11.1 (Mature)
 
 CodyNick is a browser-based visual programming environment for combining real
 CodyNick gadgets, simulated gadgets, and live dashboards in one project.
