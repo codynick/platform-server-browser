@@ -1,0 +1,373 @@
+{
+  "format": "codynick-webserial",
+  "version": 2,
+  "workspace": {
+    "codynick_live_scene": {
+      "scene": {
+        "gadgets": {
+          "cjp": {
+            "x": 40,
+            "y": 40
+          },
+          "ultrasonic": {
+            "x": 440,
+            "y": 40
+          },
+          "seven": {
+            "x": 440,
+            "y": 300
+          }
+        },
+        "distance": 50
+      }
+    },
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "cn_event_start",
+          "inputs": {
+            "DO": {
+              "block": {
+                "type": "dash_clear",
+                "next": {
+                  "block": {
+                    "type": "dash_create_info",
+                    "fields": {
+                      "NAME": "temperature",
+                      "TITLE": "Real temperature (\u00b0C)"
+                    },
+                    "next": {
+                      "block": {
+                        "type": "dash_create_graph",
+                        "fields": {
+                          "NAME": "temperature_history",
+                          "TITLE": "Real temperature (\u00b0C) \u2014 history"
+                        },
+                        "next": {
+                          "block": {
+                            "type": "dash_history",
+                            "fields": {
+                              "NAME": "temperature_history",
+                              "COUNT": 120
+                            },
+                            "next": {
+                              "block": {
+                                "type": "dash_create_info",
+                                "fields": {
+                                  "NAME": "distance",
+                                  "TITLE": "Simulated distance (cm)"
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "dash_create_graph",
+                                    "fields": {
+                                      "NAME": "distance_history",
+                                      "TITLE": "Simulated distance (cm) \u2014 history"
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "dash_history",
+                                        "fields": {
+                                          "NAME": "distance_history",
+                                          "COUNT": 120
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 30,
+          "y": 30
+        },
+        {
+          "type": "cn_event_loop",
+          "inputs": {
+            "DO": {
+              "block": {
+                "type": "variables_set",
+                "fields": {
+                  "VAR": {
+                    "name": "temperature"
+                  }
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "cn_temperature_read",
+                      "fields": {
+                        "TARGET": "HARDWARE"
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "variables_set",
+                    "fields": {
+                      "VAR": {
+                        "name": "distance"
+                      }
+                    },
+                    "inputs": {
+                      "VALUE": {
+                        "block": {
+                          "type": "cn_ultrasonic_read",
+                          "fields": {
+                            "TARGET": "SIMULATION",
+                            "device": "'STANDALONE'"
+                          }
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "cn_seven_segment_display_value",
+                        "fields": {
+                          "TARGET": "SIMULATION",
+                          "device": "'STANDALONE'"
+                        },
+                        "inputs": {
+                          "value": {
+                            "block": {
+                              "type": "math_arithmetic",
+                              "fields": {
+                                "OP": "DIVIDE"
+                              },
+                              "inputs": {
+                                "A": {
+                                  "block": {
+                                    "type": "math_round",
+                                    "fields": {
+                                      "OP": "ROUND"
+                                    },
+                                    "inputs": {
+                                      "NUM": {
+                                        "block": {
+                                          "type": "math_arithmetic",
+                                          "fields": {
+                                            "OP": "MULTIPLY"
+                                          },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": {
+                                                    "name": "temperature"
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": {
+                                                  "NUM": 10
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "B": {
+                                  "block": {
+                                    "type": "math_number",
+                                    "fields": {
+                                      "NUM": 10
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "cn_seven_segment_display_value",
+                            "fields": {
+                              "TARGET": "HARDWARE",
+                              "device": "'STANDALONE'"
+                            },
+                            "inputs": {
+                              "value": {
+                                "block": {
+                                  "type": "math_arithmetic",
+                                  "fields": {
+                                    "OP": "DIVIDE"
+                                  },
+                                  "inputs": {
+                                    "A": {
+                                      "block": {
+                                        "type": "math_round",
+                                        "fields": {
+                                          "OP": "ROUND"
+                                        },
+                                        "inputs": {
+                                          "NUM": {
+                                            "block": {
+                                              "type": "math_arithmetic",
+                                              "fields": {
+                                                "OP": "MULTIPLY"
+                                              },
+                                              "inputs": {
+                                                "A": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": {
+                                                      "VAR": {
+                                                        "name": "distance"
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "B": {
+                                                  "block": {
+                                                    "type": "math_number",
+                                                    "fields": {
+                                                      "NUM": 10
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "B": {
+                                      "block": {
+                                        "type": "math_number",
+                                        "fields": {
+                                          "NUM": 10
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "dash_info_set",
+                                "fields": {
+                                  "NAME": "temperature"
+                                },
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": {
+                                        "VAR": {
+                                          "name": "temperature"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "dash_append",
+                                    "fields": {
+                                      "NAME": "temperature_history"
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": {
+                                            "VAR": {
+                                              "name": "temperature"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "dash_info_set",
+                                        "fields": {
+                                          "NAME": "distance"
+                                        },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": {
+                                              "type": "variables_get",
+                                              "fields": {
+                                                "VAR": {
+                                                  "name": "distance"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "dash_append",
+                                            "fields": {
+                                              "NAME": "distance_history"
+                                            },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": {
+                                                      "name": "distance"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "cn_wait",
+                                                "inputs": {
+                                                  "SECONDS": {
+                                                    "block": {
+                                                      "type": "math_number",
+                                                      "fields": {
+                                                        "NUM": 0.5
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 630,
+          "y": 30
+        }
+      ]
+    }
+  }
+}

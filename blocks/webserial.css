@@ -1,0 +1,64 @@
+/* Additions for the Web Serial controls; editor.css and stage.css are unchanged upstream styles. */
+.execution-controls{flex-wrap:wrap}.execution-controls .status{white-space:normal;font-size:11px;max-width:220px}.console-body{min-height:0;display:flex;flex-direction:column}#notice{padding:10px 16px;margin:0;background:var(--panel-soft);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}#log{margin:0;padding:16px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1117;color:#dbeafe;font:13px/1.55 Consolas,Monaco,monospace;flex:1}button:focus-visible,a:focus-visible,.file-button:focus-visible{outline:3px solid #087d91;outline-offset:2px}#connect{border-color:#087d91;color:#087d91}button:disabled{opacity:.5;cursor:not-allowed}@media(min-width:981px){.topbar{height:auto;min-height:72px;flex-wrap:wrap}.app{grid-template-rows:auto minmax(0,1fr)}}
+
+/* Requested toolbar changes; original editor theme remains unchanged. */
+#connect.connected{background:#2da44e;color:#fff;border-color:rgba(27,31,36,.15)}
+#connect.connected:hover:enabled{background:#2c974b;color:#fff}
+.design-bar #saveNamed{flex:0 0 auto;min-height:34px;padding:0 13px}
+.project-menu{position:relative;display:inline-block}
+.project-menu>summary{list-style:none;min-height:40px;padding:0 15px;display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:6px;font-size:13px;font-weight:900;cursor:pointer;user-select:none}
+.project-menu>summary::-webkit-details-marker{display:none}
+.project-menu>summary:hover{background:#f6f8fa;border-color:#d0d7de}
+.project-menu>summary:focus-visible{outline:3px solid #087d91;outline-offset:2px}
+.project-menu-panel{position:absolute;top:calc(100% + 6px);left:0;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.16);z-index:40}
+.project-menu-panel button{display:flex;width:100%;justify-content:flex-start;min-height:36px;padding:0 12px;border:0;border-radius:4px;background:#fff;font-weight:700}
+.project-menu-panel button:hover:enabled{background:#eef5ff}
+.project-menu-panel hr{border:0;border-top:1px solid var(--line);margin:5px 0}
+
+[hidden]{display:none!important}#linuxHelpDialog{width:min(620px,calc(100vw - 32px));max-height:85vh;overflow:auto;font-size:14px;line-height:1.5}.linux-command{padding:12px;background:#f1f5f9;border:1px solid var(--line);border-radius:6px;overflow:auto;white-space:pre;font-size:12px}#linuxCopyStatus{font-size:12px;color:var(--muted)}
+
+.main.stage-layout{grid-template-columns:minmax(0,1fr) minmax(420px,44%)}.main.stage-collapsed{grid-template-columns:minmax(0,1fr)}.live-spaces{padding:0;display:flex;flex-direction:column;overflow:hidden}.space-toolbar{display:flex;gap:6px;padding:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line)}.space-toolbar button{min-height:30px;padding:4px 9px;font-size:12px}.space-toolbar a{font-size:11px;color:#087d91}.live-spaces iframe{border:0;width:100%;flex:1;min-height:0;background:white}.live-spaces iframe[hidden]{display:none}.stage-collapsed .live-spaces{display:none}@media(max-width:980px){.main.stage-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(400px,65vh) 65vh;overflow:auto}.main.stage-collapsed{grid-template-rows:minmax(0,1fr)}}
+
+/* File/Advanced menus and shared connection/execution controls. */
+.project-menu-panel{width:210px}
+.connection-group{display:grid;grid-template-columns:1fr 1fr;column-gap:8px;row-gap:5px;width:350px;max-width:100%;align-items:center}
+.connection-status{grid-column:1/-1;display:flex;gap:6px;white-space:nowrap;min-width:0;overflow:hidden;font-size:11px;line-height:15px;color:var(--muted)}
+.connection-status #status{flex-shrink:0}.connection-status #device{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#blockRunBtn{min-width:90px;font-size:15px}
+#blockRunBtn.stop-btn{background:#b42335;color:white;border-color:#b42335}#blockRunBtn.stop-btn:hover:enabled{background:#921c2b}
+.toolbar{align-items:flex-start}.toolbar>#toggleSpaces{margin-top:0}
+.about-dialog{width:min(520px,calc(100vw - 32px));border:2px solid #087d91;border-radius:14px;padding:24px;box-shadow:0 20px 70px #0f172a40;font-size:14px;line-height:1.6;max-height:90vh;overflow:auto}
+.about-heading{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.about-logo{display:grid;place-items:center;flex-shrink:0;width:56px;height:56px;background:#087d91;color:white;border-radius:12px;font-size:24px;font-weight:900}
+.about-eyebrow{margin:0 0 4px;color:#087d91;font-size:10px;letter-spacing:.12em;font-weight:800}.about-heading h2{margin:0;font-size:23px;line-height:1.2}
+.about-tags{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.about-tags span{border:1px solid #cbdde1;background:#f0f8f9;border-radius:6px;padding:4px 9px;font-size:12px}
+.about-intro{font-size:17px;font-weight:800}.about-note{padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel-soft);color:var(--muted);font-size:12px}.about-dialog .design-actions{margin-top:20px}.about-dialog #closeAbout{background:#087d91;color:white;border-color:#087d91}
+#examplesDialog{width:min(560px,calc(100vw - 32px));border:2px solid #087d91;border-radius:10px}#examplesDialog select{min-height:220px}.examples-note{color:var(--muted);font-size:12px;line-height:1.5}
+@media(max-width:980px){.connection-group{margin-left:auto}.toolbar{row-gap:10px}}
+@media(max-width:550px){.connection-group{width:100%;margin-left:0}.topbar .toolbar{gap:8px}.about-dialog{padding:18px}.about-heading h2{font-size:20px}}
+
+/* Rounded dropdowns with clear groups and keyboard focus. */
+.project-menu>summary{gap:9px;padding:0 12px;border-radius:9px;font-weight:700;box-shadow:0 1px 2px #0f172a08;transition:background .15s,border-color .15s,box-shadow .15s}
+.project-menu[open]>summary{background:#eaf6f7;border-color:#82bcc5;color:#086879;box-shadow:0 0 0 3px #087d910d}
+.menu-summary-icon{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.menu-chevron{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;transition:transform .15s}.project-menu[open] .menu-chevron{transform:rotate(180deg)}
+.project-menu-panel{width:240px;padding:8px;border-radius:12px;border-color:#d8e2e8;box-shadow:0 12px 34px #0f172a24,0 2px 6px #0f172a0a;animation:menu-appear .12s ease-out;max-height:calc(100dvh - 110px);overflow:auto}
+.menu-section-label{padding:7px 10px 9px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#71828f}
+.project-menu-panel button{gap:10px;min-height:40px;padding:5px 9px;border:1px solid transparent;border-radius:7px;font-weight:600;transition:background .12s,border-color .12s,color .12s}
+.project-menu-panel button:hover:enabled{background:#eef8f9;border-color:#d4e9ec;color:#086879}.project-menu-panel button:focus-visible{outline:2px solid #087d91;outline-offset:-2px;background:#eef8f9}
+.menu-item-icon{display:inline-flex;justify-content:center;align-items:center;flex:0 0 26px;width:26px;height:26px;background:#f2f6f8;color:#48727c;border-radius:6px;font:17px/1 Arial,sans-serif}.project-menu-panel hr{margin:7px 5px;border-color:#e8eef2}
+.space-toolbar{align-items:flex-start;gap:8px}.space-links,.space-tabs{display:flex;align-items:center;justify-content:flex-start;gap:7px;flex-wrap:wrap;width:100%}
+.space-toolbar a.space-open-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:32px;padding:6px 10px;border:1px solid #b6d4d9;border-radius:7px;background:#f0f9fa;color:#086879;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+.space-toolbar a.space-open-button:hover{background:#dff0f3;border-color:#73aeb9}
+.space-tabs button{border-radius:7px}.space-tabs button[aria-pressed="true"]{background:#087d91;color:#fff;border-color:#087d91}
+@keyframes menu-appear{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.project-menu-panel{animation:none}.project-menu>summary,.menu-chevron{transition:none}}
+@media(max-width:550px){.project-menu>summary{padding:0 9px;gap:6px}.menu-summary-icon{width:15px}.project-menu-panel{width:225px}}
+
+/* Give the wide logo a natural, transparent presentation. */
+.brand{min-width:0;gap:14px}.brand .logo{flex:0 0 180px;width:180px;height:54px;border-radius:0;background:none;box-shadow:none}.brand .logo img{display:block;width:100%;height:100%;object-fit:contain}.brand-title strong{font-size:19px}
+.about-heading{flex-wrap:wrap}.about-logo{display:block;flex:0 0 220px;width:220px;height:auto;background:none;border-radius:0}.about-logo img{display:block;width:100%;height:auto;object-fit:contain}
+@media(max-width:550px){.brand .logo{flex-basis:170px;width:170px;height:51px}.brand-title strong{font-size:18px}.about-logo{flex-basis:200px;width:200px}}
+
+/* Contain Blockly's high-z-index scrollbars beneath the header dropdowns. */
+.app>.topbar{position:relative;z-index:20;overflow:visible}
+.app>.main{position:relative;z-index:0;isolation:isolate}

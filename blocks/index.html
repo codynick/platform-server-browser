@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CodyNick Block IDE</title><link rel="icon" href="/assets/favicon.ico"><link rel="stylesheet" href="editor.css"><link rel="stylesheet" href="/assets/tool-navigation.css"><link rel="stylesheet" href="stage.css"><link rel="stylesheet" href="webserial.css"><script src="vendor/blockly/blockly.min.js" defer></script><script src="ch340-usb.js" defer></script><script src="linux-help.js" defer></script><script src="serial.js" defer></script><script src="live-scheduler.js" defer></script><script src="hardware.js" defer></script><script src="runtime.js" defer></script><script src="block-specs.js" defer></script><script src="live-store.js" defer></script><script src="live-router.js" defer></script><script src="dashboard-blocks.js" defer></script><script src="blocks.js" defer></script><script src="version.js" defer></script><script src="project-menu.js" defer></script><style>body{visibility:hidden}</style><script src="/blocks/accounts.js?v=20261027-header4" defer></script><link rel="stylesheet" href="/blocks/accounts.css?v=20261027-header4"></head><body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><img src="/assets/codynick-logo.png" alt="CodyNick — Bridging Ideation to Creation" draggable="false"></div>
+      <div class="brand-title">
+        <strong>Block IDE</strong>
+        <span>Live mode · Per-block Hardware / Simulation</span>
+      </div>
+    </div>
+
+    <nav class="toolbar" aria-label="Editor controls">
+      <details id="projectMenu" class="project-menu">
+        <summary><svg class="menu-summary-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h7l2 2h9v11H3zM3 7V4h7l2 3"/></svg><span>File</span><svg class="menu-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
+        <div class="project-menu-panel" aria-label="File actions"><div class="menu-section-label">Your projects</div>
+          <button id="newProject" title="Clear the workspace"><span class="menu-item-icon" aria-hidden="true">＋</span><span>New Project</span></button>
+          <button id="menuSave" title="Save private account project"><span class="menu-item-icon" aria-hidden="true">▣</span><span>Save Project</span></button>
+          <button id="loadNamed" title="Load private account project"><span class="menu-item-icon" aria-hidden="true">▱</span><span>Load Project</span></button>
+          <hr>
+          <button id="menuUpload" title="Upload a CodyNick project"><span class="menu-item-icon" aria-hidden="true">↥</span><span>Upload Project</span></button>
+          <button id="saveProject" title="Download the current CodyNick project"><span class="menu-item-icon" aria-hidden="true">↧</span><span>Download Project</span></button>
+          <hr><button id="menuExamples"><span class="menu-item-icon" aria-hidden="true">✧</span><span>Examples</span></button>
+          <hr><button id="menuAbout"><span class="menu-item-icon" aria-hidden="true">ⓘ</span><span>About</span></button>
+        </div>
+      </details>
+      <details id="advancedMenu" class="project-menu">
+        <summary><svg class="menu-summary-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5-5 7 5 7m8-14 5 7-5 7m-3-16-2 18"/></svg><span>Advanced</span><svg class="menu-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
+        <div class="project-menu-panel" aria-label="Advanced actions"><div class="menu-section-label">Tools</div>
+          <button id="toggleConsole"><span class="menu-item-icon" aria-hidden="true">›_</span><span>Console</span></button>
+          <button id="viewPython" onclick="viewPython()"><span class="menu-item-icon" aria-hidden="true">⌘</span><span>View Python</span></button>
+          <button id="linuxSetup" hidden><span class="menu-item-icon" aria-hidden="true">⚙</span><span>Linux USB setup</span></button>
+        </div>
+      </details>
+      <input id="importFile" type="file" accept=".codynick,.json" />
+      <button id="toggleSpaces">Hide Spaces</button>
+      <div class="connection-group">
+        <button id="connect" title="Connect to your CodyJoy Pro USB connection">Connect</button>
+        <button id="blockRunBtn" class="run-btn" aria-label="Run program" aria-pressed="false" title="Run this browser program">Run</button>
+        <div class="connection-status" role="status" aria-live="polite"><span id="status">Disconnected</span><span id="device">Waiting for USB</span></div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="liveMain" class="main stage-layout">
+    <section class="workspace-shell">
+      <div class="design-bar"><label for="designName">Design</label><input id="designName" type="text" maxlength="120" placeholder="Untitled" autocomplete="off"><button id="saveNamed" title="Save named design in this browser">Save</button>
+      </div>
+      <div class="panel-head" title="Programs run in this browser while connected; Stop leaves hardware outputs unchanged.">
+        <nav class="toolbox-modes" style="flex-wrap:wrap" role="tablist" aria-label="Block categories" aria-orientation="horizontal">
+          <button id="generalToolboxTab" role="tab" aria-selected="true" aria-controls="toolboxWorkspace">General</button>
+          <button id="hardwareToolboxTab" role="tab" aria-selected="false" aria-controls="toolboxWorkspace">Hardware</button>
+          <button id="dashboardToolboxTab" role="tab" aria-selected="false" aria-controls="toolboxWorkspace">Dashboard</button>
+        </nav>
+        <span id="workspaceStatus" class="status" role="status">Live mode · Ready to edit.</span>
+      </div>
+      <div class="workspace-coding">
+        <div id="toolboxWorkspace" role="tabpanel" aria-labelledby="generalToolboxTab"><div id="blocklyDiv"></div></div>
+      </div>
+    </section>
+    <aside id="liveSpaces" class="sprite-panel live-spaces"><div class="space-toolbar"><div class="space-links"><a class="space-open-button" href="/simulator/" target="_blank" rel="noopener">Open Simulator <span aria-hidden="true">↗</span></a><a class="space-open-button" href="/dashboard/" target="_blank" rel="noopener">Open Dashboard <span aria-hidden="true">↗</span></a></div><div class="space-tabs"><button id="show-simulator">Simulation</button><button id="show-dashboard">Dashboard</button></div></div><iframe id="simulatorFrame" title="Gadget simulation" src="/simulator/"></iframe><iframe id="dashboardFrame" title="Live dashboard" src="/dashboard/" hidden></iframe></aside>
+  </main>
+</div>
+
+<div id="pythonModal" class="modal-backdrop" onclick="closePythonModal(event)">
+  <section class="modal" role="dialog" aria-modal="true" aria-label="Generated Python">
+    <div class="modal-head">
+      <span>Generated Python</span>
+      <div class="modal-actions">
+        <button onclick="copyPythonPreview(event)">Copy</button>
+        <button onclick="closePythonModal(event)">Close</button>
+      </div>
+    </div>
+    <pre id="pythonPreview"># Click “View Python” to generate a preview.</pre>
+  </section>
+</div>
+
+<div id="toast" class="toast"></div>
+<dialog id="aboutDialog" class="design-dialog about-dialog" aria-labelledby="aboutTitle">
+  <div class="about-heading"><div class="about-logo"><img src="/assets/codynick-logo.png" alt="CodyNick — Bridging Ideation to Creation" draggable="false"></div><div><p class="about-eyebrow">CREATE · CONNECT · EXPLORE</p><h2 id="aboutTitle">CodyNick Platform</h2></div></div>
+  <div class="about-tags"><span>Version <strong id="aboutVersion"></strong></span><span>Released <time id="aboutDate"></time></span></div>
+  <p class="about-intro">Build with blocks. Bring your gadgets to life.</p>
+  <p>Connect CodyJoy Pro hardware, explore simulated gadgets, and turn readings into live dashboards.</p>
+  <p class="about-note">Programs run while this browser stays open. Sign in to save private projects to your account. Download to keep guest work.</p>
+  <div class="design-actions"><button id="closeAbout">Close</button></div>
+</dialog>
+<dialog id="examplesDialog" class="design-dialog" aria-labelledby="examplesTitle">
+  <h2 id="examplesTitle">Example Projects</h2>
+  <label for="example">Choose an example</label>
+  <select id="example" size="6"><option value="sim-dashboard">Try a pretend sensor and draw a graph</option><option value="mixed">Use a real sensor to light a pretend LED</option><option value="cross-displays">Send real and pretend readings to displays</option><option value="blink">Blink a light</option><option value="temperature">Show the temperature</option><option value="joystick">Control a light with the joystick</option></select>
+  <p class="examples-note">Loading an example replaces your workspace. Download your current project first if you want to keep it.</p>
+  <div class="design-actions"><button id="closeExamples">Cancel</button><button id="loadExample">Load Example</button></div>
+</dialog>
+<dialog id="designDialog" class="design-dialog" aria-labelledby="designDialogTitle">
+  <h2 id="designDialogTitle">Load Design</h2>
+  <label for="designList">Private projects in your account</label>
+  <select id="designList" size="8" ></select>
+  <p id="designListStatus" role="status">Saved in this browser</p>
+  <div class="design-actions"><button id="closeDesignDialog">Cancel</button><button id="loadNamedConfirm">Load</button></div>
+</dialog>
+
+<div id="consoleModal" class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-label="Device console"><div class="modal-head"><span>Device console</span><div class="modal-actions"><button id="clearLog">Clear</button><button id="closeConsole">Close</button></div></div><div class="console-body"><p id="notice" role="status">Use desktop Chrome. Close other applications using the CJP serial port.</p><pre id="log" aria-label="Program and serial output"></pre></div></section></div><script src="python-preview.js" defer></script><dialog id="linuxHelpDialog" class="design-dialog" aria-labelledby="linuxHelpTitle"><h2 id="linuxHelpTitle">Linux USB setup</h2><p id="linuxHelpReason">On Ubuntu/Kubuntu, your account normally needs dialout membership to access the CJP serial port.</p><p><strong>Run this on the Linux computer connected to the CJP—not on the VPS.</strong></p><pre class="linux-command"><code id="linuxCommand">sudo usermod -aG dialout "$USER"</code></pre><button id="copyLinuxCommand">Copy command</button><p id="linuxCopyStatus" role="status"></p><p>Then <strong>fully log out of your desktop and log back in</strong>. Closing the terminal or refreshing the page is not enough. Reopen Chrome and reconnect.</p><p>Close Arduino Serial Monitor, serial terminals, and other tabs using the device. If opening still fails, check:</p><pre class="linux-command"><code>ls -l /dev/ttyUSB0
+id -nG
+sudo fuser -v /dev/ttyUSB0</code></pre><p>Replace ttyUSB0 if your selected device has a different name. These instructions apply to Ubuntu/Kubuntu; other Linux distributions may use a different serial-access group. Browser sandbox restrictions can also prevent access.</p><p>The website cannot change these operating-system permissions for you.</p><div class="design-actions"><button id="closeLinuxHelp">Close</button></div></dialog></body></html>

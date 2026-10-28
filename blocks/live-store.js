@@ -1,0 +1,30 @@
+'use strict';
+(()=>{
+ if(window.CodyLiveStore)return;
+ const key='codynick-live-state-v1';
+ const defaults=()=>({scene:{gadgets:{cjp:{x:40,y:40}},temperature:21.1,distance:50,soil:50,wifi_link:true,cloud_link:true,motion:false,rfid:'00000000',ultraDistance:50},leds:Array(16).fill('#000000'),matrix:{text:'',speed:1,pixels:Array(64).fill(0),mode:'pixels',revision:0},seven_segment:'',ultra_segment:'',states:[],joystick_states:[],inputAt:0,joyAt:0,notes:[],sequence:0,widgets:{},run:null,wifi:{wifi:0,iot:0,ssid:'',slots:[]}});
+ let memory=defaults();
+ let updates;
+ const changed=()=>window.dispatchEvent(new Event('codynick-live-change'));
+ try{updates=new BroadcastChannel('codynick-live-updates-v1');updates.onmessage=()=>changed();}catch{}
+ window.addEventListener('storage',event=>{if(event.key===key||event.key===null)changed();});
+
+ function read(){try{const s=JSON.parse(localStorage.getItem(key)||'null');if(s&&s.scene?.gadgets&&s.widgets){memory={...defaults(),...s};}else{memory=defaults();}}catch{}return structuredClone(memory);}
+ function update(fn){const s=read();const result=fn(s);memory=s;localStorage.setItem(key,JSON.stringify(s));changed();updates?.postMessage('changed');return result;}
+ const finite=(n,label)=>{n=Number(n);if(!Number.isFinite(n))throw Error(label+' must be a finite number');return n;};
+ function scene(clean){const d=defaults().scene;const known=['cjp','seven','temperature','matrix','joystick','ultrasonic','soil','wifi','motion','rfid','ultraseg'];if(!clean?.gadgets||!clean.gadgets.cjp)throw Error('Simulation must contain CodyJoy Pro.');const out={...d,...clean,gadgets:{}};for(const [kind,p] of Object.entries(clean.gadgets)){if(!known.includes(kind))throw Error('Unsupported simulated gadget: '+kind);out.gadgets[kind]={x:Math.max(0,Math.min(1400,finite(p.x,'X'))),y:Math.max(0,Math.min(1500,finite(p.y,'Y')))};}for(const [n,lo,hi]of [['temperature',-55,125],['distance',2,400],['soil',0,100],['ultraDistance',2,400]]){out[n]=finite(out[n],n);if(out[n]<lo||out[n]>hi)throw Error('Invalid simulated '+n);}out.motion=!!out.motion;out.rfid=String(out.rfid).toUpperCase();if(!/^[0-9A-F]{8}$/.test(out.rfid))throw Error('RFID must have 8 hexadecimal characters');return out;}
+ function simState(){const s=read();const now=Date.now();return {...s,now:now/1000,connected:!!s.run&&now-s.run.at<3500,states:now-s.inputAt<1000?s.states:[],joystick_states:now-s.joyAt<1000?s.joystick_states:[],error:''};}
+ function simCommand(c){return update(s=>{switch(c.action){case 'scene':s.scene=scene(c.scene);break;case 'input':{const states=c.states;if(!Array.isArray(states)||states.some(v=>!['UP','DOWN','LEFT','RIGHT','CLICK'].includes(v)))throw Error('Invalid joystick input');if(c.device==='joystick'){s.joystick_states=states;s.joyAt=Date.now();}else{s.states=states;s.inputAt=Date.now();}break;}case 'wifi_slot':{const type=String(c.type),index=Number(c.index);if(!['0','1','2','3'].includes(type)||!Number.isInteger(index)||index<0||index>3)throw Error('Invalid cloud slot');const slots=s.wifi.slots.filter(v=>v.type!==type||v.index!==index);slots.push({type,index,value:c.value});s.wifi.slots=slots;break;}default:throw Error('Unknown simulator action');}return {ok:true};});}
+ function widget(s,name){if(!Object.hasOwn(s.widgets,name))throw Error('Create dashboard widget "'+name+'" before using it.');return s.widgets[name];}
+ function dashboard(action,a){return update(s=>{const name=String(a.NAME||'widget');if(action==='dash_clear'){s.widgets={};return;}if(action.startsWith('dash_create')){const type=action==='dash_create'?a.TYPE:action.slice(12);if(!['info','gauge','graph'].includes(type))throw Error('Unknown widget type');if(Object.keys(s.widgets).length>=100&&!Object.hasOwn(s.widgets,name))throw Error('Maximum 100 widgets');Object.defineProperty(s.widgets,name,{enumerable:true,writable:true,configurable:true,value:{id:name,type,title:String(a.TITLE||name),value:type==='graph'?'[]':0,min_value:0,max_value:50,color:'blue',font_name:'Arial',font_size:32,horizontal_alignment:'center',vertical_alignment:'center',column_span:1,height_multiplier:1,history:[],limit:20,samples:0,description:'Source: Program',valid:true}});return;}
+ const w=widget(s,name);switch(action){case 'dash_set':case 'dash_info_set':case 'dash_gauge_set':w.value=w.type==='gauge'?finite(a.VALUE,'Gauge value'):String(a.VALUE??'');break;
+ case 'dash_append':if(w.type!=='graph')throw Error('Append requires a graph');w.samples++;w.history.push({x:w.samples,y:finite(a.VALUE,'Graph sample')});w.history=w.history.slice(-w.limit);w.value=JSON.stringify(w.history);break;
+ case 'dash_history':if(w.type!=='graph')throw Error('History requires a graph');w.limit=Math.max(1,Math.min(1000,Math.floor(finite(a.COUNT,'History'))));w.history=w.history.slice(-w.limit);w.value=JSON.stringify(w.history);break;
+ case 'dash_range':w.min_value=finite(a.MIN,'Minimum');w.max_value=finite(a.MAX,'Maximum');if(w.max_value<=w.min_value)throw Error('Maximum must exceed minimum');break;
+ case 'dash_appearance':w.color=a.COLOR;w.column_span=Math.max(1,Math.min(3,Number(a.WIDTH)));w.height_multiplier=Math.max(1,Math.min(3,Number(a.HEIGHT)));break;
+ case 'dash_font':w.font_name=a.FONT;w.font_size=Math.max(8,Math.min(96,Number(a.SIZE)));w.horizontal_alignment=a.HORIZONTAL;w.vertical_alignment=a.VERTICAL;break;
+ default:throw Error('Unsupported dashboard block: '+action);}
+ if(a.SOURCE&&['dash_set','dash_info_set','dash_gauge_set','dash_append'].includes(action))w.description='Source: '+a.SOURCE;
+ });}
+ window.CodyLiveStore={read,update,scene,simState,simCommand,dashboard,cards:()=>Object.values(read().widgets),dashboardInput:(id,value)=>update(s=>{widget(s,id).value=value;}),start(token){update(s=>{if(s.run&&Date.now()-s.run.at<3500)throw Error('Another Live program is running in this browser. Stop it first.');s.run={token,at:Date.now()};});},heartbeat(token){update(s=>{if(s.run?.token===token)s.run.at=Date.now();});},stop(token){update(s=>{if(s.run?.token===token)s.run=null;});}};
+})();
