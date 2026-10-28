@@ -1,31 +1,30 @@
-# Integrated CAS component
+# Local CodyNick upgrade
 
-This folder is deployed automatically by the repository's setup.sh. See the root
-README for the single-line command and initial CAS settings. Existing servers can
-also run CODYNICK_DOMAIN=code.codynick.com bash cas/update.sh from this repository.
+This upgrades your existing website and CAS backend in place. No repository
+upload, git command, or full website replacement is required.
 
-The updater preserves identity configuration and private project data. It derives
-PUBLIC_ORIGIN and the CAS logout service return URL from CODYNICK_DOMAIN on every
-run. An existing custom CAS_LOGOUT_URL endpoint is preserved; its service query
-parameter is refreshed. CAS logout still requires the identity server to allow
-the exact editor URL and enable post-logout redirection.
+1. Close every CodyNick editor, simulator and dashboard tab.
+2. Extract this archive and upload codynick-cas-update over the folder in /root.
+3. Run as root:
 
-The account confirmation step remains enabled. Skipping it under the current
-fixed callback design needs additional CAS capability to correlate the response
-to the originating login. Do not disable its CSRF/Origin or one-time-token checks.
+   cd /root/codynick-cas-update && bash update.sh
 
-Close existing editor, simulator and dashboard tabs before upgrading. Reopen the
-editor afterward. Old open tabs keep executing their previously loaded scripts.
+The updater reads the domain from existing CAS configuration, falling back to
+/etc/codynick/domain. It asks only if neither exists. Existing identity settings
+and private projects are preserved. A backup and rollback command are printed.
 
-Each deployment prints a backup path with rollback.sh. The static install also
-has its own backup. Use the static backup to restore the complete previous UI if
-rolling back a combined setup. The private database is retained by rollback.
+Changes: remove legacy import/removal buttons; put Sign in/out at top right,
+with username only below it; arrange Logo, File, Advanced, Examples, Show/Hide Spaces, Connect,
+Run, Account; derive logout return URL from this installation's domain. CAS must
+allow the exact editor /blocks/ return URL and enable post-logout redirection.
 
-Tests:
-  cd cas/backend && python3 -m unittest -q
-  node cas/test_accounts.cjs
-  python3 cas/test_install.py
+The confirmation page remains until the CAS server supports a verifiable
+round-trip login token or another correlated authentication flow. This update
+does not claim to diagnose the reported 10-second delay; sanitized request timing
+is included to help locate it.
 
-Backend dependencies are pinned in backend/requirements.txt. Request path,
-status and duration are logged for auth requests; ticket URLs and user data
-are not logged. Server-Timing is also returned to support latency diagnosis.
+After installation, reopen the editor and Ctrl+F5. Old open tabs keep running
+their old scripts until closed. Repeat the same command for future local upgrades
+after replacing this update folder with the new revision.
+
+Header revision: File, Advanced, Examples and Spaces share the logo vertical center on desktop. The new Examples button opens the existing example chooser.

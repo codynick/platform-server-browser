@@ -1,0 +1,32 @@
+CodyNick Portal 3.11.1 — COMPLETE CLEAN INSTALLATION
+
+You do not need to reinstall the OS again after the failed attempt.
+
+1. Extract the ZIP on your computer.
+2. Upload the codynick-clean-install folder to /root/ on the VPS.
+3. Confirm DNS code.codynick.com points to this VPS; ports 80 and 443 must be open.
+4. Close all old CodyNick browser tabs.
+5. Run this one command on the VPS:
+
+sudo env CODYNICK_DOMAIN=code.codynick.com bash /root/codynick-clean-install/setup.sh
+
+The installer uses the source in THIS folder, not the old GitHub release. It
+installs dependencies, prepares Apache, obtains HTTPS, deploys the complete
+website, then installs CAS/private projects. Repeating this command is supported.
+On a fresh system it asks you to confirm CAS endpoints and identity attributes.
+Existing configurations/projects are preserved if this is a retry or update.
+On the clean OS you requested, no old config/database is restored by this package.
+
+CAS server registrations (on id.codynick.com) must allow:
+https://code.codynick.com/auth/callback
+https://code.codynick.com/blocks/
+Post-logout redirection must also be enabled on CAS.
+
+Open https://code.codynick.com/blocks/ after setup succeeds and press Ctrl+F5.
+The package includes all implemented CAS/header changes, including Examples
+and centered header buttons. Identity confirmation is still enabled. The live
+10-second sign-in delay remains undiagnosed; timing diagnostics are included.
+
+To use your GitHub one-line command in future: push THIS folder's contents to
+the ROOT of codynick/platform-server-browser on main (not a nested folder).
+Until that is done, the GitHub raw setup URL still serves the earlier installer.

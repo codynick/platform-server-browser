@@ -17,11 +17,14 @@ load(example('blink'));
 for page in ['blocks/index.html','simulator/index.html','dashboard/index.html']:
  p=root/page;s=p.read_text()
  if '/blocks/accounts.js' not in s:s=s.replace('</head>','<style>body{visibility:hidden}</style><script src="/blocks/accounts.js" defer></script></head>')
- s=re.sub(r'/blocks/accounts\.js(?:\?[^\"]*)?', '/blocks/accounts.js?v=20261027-header4', s)
+ s=re.sub(r'/blocks/accounts\.js(?:\?[^\"]*)?', '/blocks/accounts.js?v=20261027-header5', s)
  if page.startswith('blocks/'):
+  if 'id="headerExamples"' not in s:
+   s=s.replace('<button id="toggleSpaces">','<button id="headerExamples" title="Open example projects">Examples</button>\n      <button id="toggleSpaces">')
   s=s.replace('Saved on this device','Private projects in your account').replace('Projects and dashboard layouts are saved locally in your browser.','Sign in to save private projects to your account. Download to keep guest work.').replace('Save named project in this browser','Save private account project').replace('Load a project saved in this browser','Load private account project')
  if page.startswith('blocks/') and '/blocks/accounts.css' not in s:
-  s=s.replace('</head>','<link rel="stylesheet" href="/blocks/accounts.css?v=20261027-header4"></head>')
+  s=s.replace('</head>','<link rel="stylesheet" href="/blocks/accounts.css?v=20261027-header5"></head>')
+ s=re.sub(r'/blocks/accounts\.css(?:\?[^\"]*)?', '/blocks/accounts.css?v=20261027-header5', s)
  p.write_text(s)
 
 # Apply on both first-time and already-patched installations.

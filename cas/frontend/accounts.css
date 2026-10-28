@@ -1,8 +1,8 @@
-/* Account header: Logo, File, Advanced, Spaces, Connect/Run, Account. */
-.app>.topbar{flex-wrap:nowrap;align-items:flex-start;gap:18px;min-height:82px;height:auto}
-.topbar .brand{flex:0 0 auto;min-width:0;padding-top:2px}
+/* Account header: Logo, File, Advanced, Examples, Spaces, Connect/Run, Account. */
+.app>.topbar{flex-wrap:nowrap;align-items:center;gap:18px;min-height:82px;height:auto}
+.topbar .brand{flex:0 0 auto;min-width:0;padding-top:0}
 .topbar .brand-title{display:none}
-.topbar .toolbar{flex:1 1 auto;width:auto;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;gap:10px}
+.topbar .toolbar{flex:1 1 auto;width:auto;flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:10px}
 .topbar .toolbar>#toggleSpaces{margin-left:auto;margin-right:auto;white-space:nowrap}
 .topbar .connection-group{flex:0 1 300px;width:300px;min-width:190px}
 .account-controls{flex:0 0 130px;margin-left:auto;display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:0}
@@ -12,3 +12,5 @@
 @media(max-width:1050px){.topbar .brand .logo{width:145px;flex-basis:145px}.app>.topbar{gap:12px}.topbar .toolbar{gap:8px}.topbar .connection-group{width:220px;min-width:170px}.account-controls{flex-basis:112px}.toolbar button{padding-left:10px;padding-right:10px}}
 @media(max-width:800px){.app>.topbar{flex-wrap:wrap;padding-top:14px}.topbar .brand{flex:0 0 auto;margin-right:145px}.topbar .toolbar{flex:1 1 100%;width:100%;flex-wrap:wrap;padding-top:8px}.topbar .account-controls{position:absolute;top:12px;right:16px;width:120px}.topbar .toolbar>#toggleSpaces{margin-left:auto;margin-right:0}.topbar .connection-group{flex:0 1 220px;margin-left:auto}}
 @media(max-width:500px){.topbar .connection-group{flex:1 1 100%;width:100%;margin-left:0}.toolbar>#toggleSpaces{padding-left:8px;padding-right:8px}.topbar .project-menu>summary{padding-left:8px;padding-right:8px}}
+
+.topbar #headerExamples{white-space:nowrap;flex:0 0 auto}

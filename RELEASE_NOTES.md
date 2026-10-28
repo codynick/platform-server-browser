@@ -1,3 +1,12 @@
+## 3.11.1 — clean installation repair
+
+- Create HTTP and HTTPS site before deploying any application/CAS components.
+- Correct bootstrap repository to codynick/platform-server-browser.
+- Install complete extracted ZIP directly without fetching other source.
+- Retry/repeat installation tests and early DNS/TLS failure checks.
+- Include latest centered header controls and dedicated Examples button.
+- First-install CAS endpoint/attribute prompts; preserve configured installs.
+
 ## 3.11.0
 
 - Bundle CAS and private projects into the same setup.sh install/update flow.

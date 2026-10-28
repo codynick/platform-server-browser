@@ -3,6 +3,16 @@ set -euo pipefail
 [[ $EUID == 0 ]] || { echo 'Run as root.'; exit 1; }
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
 domain=${CODYNICK_DOMAIN:-}
+if [[ -z $domain && -f /etc/codynick-cas/config.json ]]; then
+ domain=$(python3 - <<'PYDOMAIN'
+import json
+from urllib.parse import urlsplit
+with open('/etc/codynick-cas/config.json') as f:c=json.load(f)
+print(c.get('DOMAIN') or urlsplit(c.get('PUBLIC_ORIGIN','')).hostname or '')
+PYDOMAIN
+)
+fi
+if [[ -z $domain && -f /etc/codynick/domain ]]; then read -r domain < /etc/codynick/domain; fi
 if [[ -z $domain ]]; then read -rp 'Existing website domain (e.g. ide.codynick.com): ' domain; fi
 [[ $domain =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ && $domain != *..* ]] || exit 1
 domain=${domain,,}
@@ -14,6 +24,20 @@ validate=${CAS_VALIDATE_URL:-$cas/p3/serviceValidate}
 idattr=${CAS_ID_ATTRIBUTE:-__principal__}
 nameattr=${CAS_NAME_ATTRIBUTE:-name}
 emailattr=${CAS_EMAIL_ATTRIBUTE:-email}
+if [[ ! -f /etc/codynick-cas/config.json && -t 0 ]]; then
+ echo 'First installation: confirm the settings of your existing CAS server.'
+ read -rp "CAS base URL [$cas]: " cas_input
+ cas=${cas_input:-$cas}
+ validate=${CAS_VALIDATE_URL:-$cas/p3/serviceValidate}
+ read -rp "CAS validation URL [$validate]: " cas_input
+ validate=${cas_input:-$validate}
+ read -rp "Stable CodyNick ID attribute [$idattr; __principal__ means CAS user]: " cas_input
+ idattr=${cas_input:-$idattr}
+ read -rp "Name attribute [$nameattr]: " cas_input
+ nameattr=${cas_input:-$nameattr}
+ read -rp "Email attribute [$emailattr]: " cas_input
+ emailattr=${cas_input:-$emailattr}
+fi
 apt-get update
 apt-get install -y python3-venv python3-pip apache2 curl
 backup=$(mktemp -d /root/codynick-cas-backup-XXXXXXXX)

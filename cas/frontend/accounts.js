@@ -52,6 +52,8 @@
  }
  out.onclick=async()=>{if(busy||!confirm('Sign out of CodyNick and the central account? Download unsaved changes first. This may affect sign-in to other CodyNick services.'))return;busy=true;try{const result=await api('/auth/logout','POST');accountChanged('__guest__',true);localStorage.setItem('codynick-active-account','__guest__');location.href=result.logout_url;}catch(e){say(e.message);}finally{busy=false;}};
  if(editor){
+  const examples=document.getElementById('headerExamples');
+  if(examples)examples.onclick=()=>document.getElementById('menuExamples').click();
   const save=async()=>{
    if(busy)return;
    if(!user){say('Sign in to save a private account project, or use Download Project.');return;}
